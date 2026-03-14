@@ -1,0 +1,47 @@
+{
+  "projectType": "frontend",
+  "projectName": "Rsantana Portfolio",
+  "projectDescription": "A personal portfolio website for web developer Ronald Santana, built with Astro and Bootstrap, showcasing projects and professional skills.",
+  "theme": "willow",
+  "primaryColor": "#040404",
+  "lightColor": null,
+  "darkColor": null,
+  "navigation": {
+    "groups": [
+      {
+        "group": "Overview",
+        "pages": ["introduction", "getting-started"]
+      },
+      {
+        "group": "Project Structure",
+        "pages": ["structure/pages", "structure/components", "structure/content"]
+      },
+      {
+        "group": "Customization",
+        "pages": ["customization/styling", "customization/adding-projects"]
+      },
+      {
+        "group": "Deployment",
+        "pages": ["deployment"]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Astro-powered static site for fast performance",
+    "Bootstrap 5 responsive design",
+    "Content Collections for managing project entries",
+    "Animated page load transitions using CSS keyframes",
+    "Intersection Observer API for scroll-triggered animations",
+    "Minimal single-column layout optimized for readability",
+    "TypeScript support via tsconfig"
+  ],
+  "publicApiSurface": [
+    "src/content/projects/ — Markdown files defining project entries (title, description, pubDate, heroImage, tag, url)",
+    "src/components/Card.astro — Props: src, description, title, tag, url",
+    "src/layouts/Layout.astro — Props: title",
+    "src/components/Projects.astro — Reads from 'projects' content collection",
+    "src/components/Nav.astro — Site navigation bar",
+    "src/components/Header.astro — Hero section with bio",
+    "src/components/Footer.astro — Footer with social links and copyright"
+  ]
+}
