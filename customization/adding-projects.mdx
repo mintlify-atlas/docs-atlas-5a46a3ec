@@ -1,0 +1,153 @@
+---
+title: 'Adding projects'
+description: 'Add a new project to your portfolio by creating a Markdown file and dropping an image into the public directory.'
+---
+
+Projects are managed through [Astro Content Collections](https://docs.astro.build/en/guides/content-collections/). The `Projects.astro` component calls `getCollection('projects')` at build time and renders a card for every `.md` file it finds in `src/content/projects/`. Adding a project requires no code changes — only a new Markdown file and a hero image.
+
+## How it works
+
+The collection schema is defined in `src/content/config.ts` using Zod:
+
+```typescript
+const projectsCollection = defineCollection({
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    pubDate: z
+      .string()
+      .or(z.date())
+      .transform((val) => new Date(val)),
+    updatedDate: z
+      .string()
+      .optional()
+      .transform((str) => (str ? new Date(str) : undefined)),
+    heroImage: z.string().optional(),
+    tag: z.string().optional(),
+    url: z.string().optional(),
+  }),
+});
+```
+
+Astro validates every file in `src/content/projects/` against this schema at build time. If a required field is missing or has the wrong type, the build will fail with a clear error message.
+
+## Steps to add a project
+
+<Steps>
+  <Step title="Create a new Markdown file in src/content/projects/">
+    Name the file after your project using kebab-case. The filename does not appear on the site, but keeping it descriptive makes the content directory easier to navigate.
+
+    ```
+    src/content/projects/my-new-project.md
+    ```
+  </Step>
+
+  <Step title="Add the frontmatter">
+    Open the file and add the YAML frontmatter block. At minimum, `title`, `description`, and `pubDate` are required:
+
+    ```markdown
+    ---
+    title: 'My New Project'
+    description: 'A brief description of what the project does'
+    pubDate: '2024-03-15'
+    heroImage: '/my-new-project.png'
+    tag: 'Web developer'
+    url: 'https://my-new-project.netlify.app/'
+    ---
+    ```
+  </Step>
+
+  <Step title="Add the hero image to the public/ directory">
+    Place the image file at the root of the `public/` directory. The filename must match the `heroImage` value in your frontmatter (including the leading `/`).
+
+    ```
+    public/
+    └── my-new-project.png
+    ```
+
+    <Warning>
+      The hero image is rendered inside a `ratio ratio-16x9` Bootstrap container with `object-fit-scale`. Portrait or square images will be cropped or distorted. Use **landscape images** (16:9 or similar wide aspect ratio) for best results.
+    </Warning>
+  </Step>
+
+  <Step title="Run the dev server to verify">
+    Start the development server and confirm the new project card appears in the projects section:
+
+    ```bash
+    npm run dev
+    ```
+
+    The card will include the project title, tag line, and a link to the `url` you provided. No component edits are needed.
+  </Step>
+</Steps>
+
+## Frontmatter field reference
+
+All fields recognized by the collection schema:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `title` | string | Yes | Project name displayed as the card heading. |
+| `description` | string | Yes | Short description of the project. Used as the `alt` text on the hero image. |
+| `pubDate` | string or Date | Yes | Publication date. Accepts `'YYYY-MM-DD'` strings or a JavaScript `Date` object. Transformed to a `Date` internally. |
+| `updatedDate` | string | No | Date the project was last updated. Same format as `pubDate`. |
+| `heroImage` | string | No | Root-relative path to the image in `public/`, e.g. `'/Edudu.png'`. |
+| `tag` | string | No | Role or technology label shown below the project title, e.g. `'Web developer'`. |
+| `url` | string | No | Link to the live project. Should be an absolute `https://` URL. |
+
+### Required vs optional fields
+
+<Columns cols={2}>
+  <Card title="Required" icon="circle-alert">
+    `title`, `description`, and `pubDate` must be present in every project file. Omitting any of these will cause a build error.
+  </Card>
+  <Card title="Optional" icon="circle-check">
+    `heroImage`, `tag`, `url`, and `updatedDate` are all optional. A project file without a `heroImage` will render the card without an image.
+  </Card>
+</Columns>
+
+## Complete example
+
+Based on the existing `Edudu.md` project:
+
+```markdown
+---
+title: 'Edudu'
+description: 'Plataforma educativa para niños'
+pubDate: '2023-10-25'
+heroImage: '/Edudu.png'
+tag: 'Web developer'
+url: 'https://edudu-platform.netlify.app/'
+---
+```
+
+### Notes on specific fields
+
+**`pubDate` format**
+
+The schema accepts either an ISO date string (`'YYYY-MM-DD'`) or a native JavaScript `Date` object. Both are transformed to a `Date` instance by Astro at build time. The string format is easiest to write by hand:
+
+```yaml
+pubDate: '2024-06-01'       # string — recommended for hand-editing
+```
+
+**`heroImage` path**
+
+The value must be a root-relative path that points to a file inside the `public/` directory. The leading `/` is required:
+
+```yaml
+heroImage: '/Edudu.png'          # file lives at public/Edudu.png
+heroImage: '/projects/hero.jpg'  # file lives at public/projects/hero.jpg
+```
+
+**`url` value**
+
+Use an absolute `https://` URL pointing to the deployed project. The `Card.astro` component renders this as an `<a>` with `target="_blank" rel="noopener noreferrer"`:
+
+```yaml
+url: 'https://my-project.netlify.app/'
+```
+
+<Note>
+  If you omit `url`, the card is still rendered but the entire card will not be wrapped in a link — visitors cannot click through to the live project.
+</Note>

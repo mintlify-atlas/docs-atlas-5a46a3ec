@@ -1,0 +1,175 @@
+---
+title: 'Components'
+description: 'The five Astro components that make up the portfolio UI: Nav, Header, Projects, Card, and Footer.'
+---
+
+All components live in `src/components/`. They are pure Astro components — no client-side framework. Each one maps to a distinct section of the page.
+
+<Columns cols={2}>
+  <Card title="Nav.astro" icon="navigation">
+    Top navigation bar with the site logo.
+  </Card>
+  <Card title="Header.astro" icon="user">
+    Bio section with name and skills summary.
+  </Card>
+  <Card title="Projects.astro" icon="grid">
+    Reads the projects content collection and renders a grid of Cards.
+  </Card>
+  <Card title="Card.astro" icon="square">
+    Individual project card with image, title, and tag.
+  </Card>
+  <Card title="Footer.astro" icon="link">
+    Social links, copyright notice, and a live clock.
+  </Card>
+</Columns>
+
+## Nav.astro
+
+`Nav` renders a top navigation bar containing the site logo as a linked SVG image. It has no props.
+
+The element uses Bootstrap flex utilities and applies entrance animation classes (`animate-on-load animate-delay-1`) that are driven by the `IntersectionObserver` script in `Layout.astro`.
+
+```astro src/components/Nav.astro
+<nav class="d-flex align-items-center justify-content-between py-4 mb-md-5 mb-lg-5 animate-on-load animate-delay-1">
+  <a href="/">
+    <img src="/favicon.svg" alt="" />
+  </a>
+</nav>
+<style>
+  img { width: 50px; height: 50px; }
+</style>
+```
+
+## Header.astro
+
+`Header` renders the portfolio bio section. It has no props — all content is hardcoded in the component.
+
+The section displays Ronald Santana's title and a short description of his skills, including HTML, CSS, JavaScript, Astro, Bootstrap, and WordPress.
+
+```astro src/components/Header.astro
+<header class="mb-lg-5 py-5 animate-on-load animate-delay-2">
+  <h1 class="fs-6 mb-3">
+    Web Developer <br>
+    <strong class="fs-2">Ronald Santana</strong>
+  </h1>
+  <p class="mb-3">
+    Prospero en entornos que combinan diseño y desarrollo...
+    Conocimientos en HTML, CSS, JavaScript, Astro, Bootstrap, WordPress.
+  </p>
+</header>
+```
+
+## Projects.astro
+
+`Projects` fetches all entries from the `projects` content collection using Astro's `getCollection` API, then renders one `Card` component per entry. It has no props.
+
+The component wraps everything in a `<section id="projects">` so it can be targeted by anchor links.
+
+```astro src/components/Projects.astro
+---
+import { getCollection } from 'astro:content';
+import Card from "./Card.astro";
+const projects = await getCollection('projects');
+---
+<section id="projects" class="animate-on-load animate-delay-3">
+  <header class="mb-4">
+    <h2 class="m-0 fs-4 fw-bold">Proyectos</h2>
+  </header>
+  <section class="row gap-3">
+    {projects.map((project: any) => (
+      <Card
+        src={project.data.heroImage}
+        description={project.data.description}
+        title={project.data.title}
+        tag={project.data.tag}
+        url={project.data.url}
+      />
+    ))}
+  </section>
+</section>
+```
+
+<Tip>
+Adding a new Markdown file to `src/content/projects/` is all that is required to add a project to the grid. No changes to this component are needed.
+</Tip>
+
+## Card.astro
+
+`Card` renders a single project entry as a linked article with a 16:9 hero image, a title, and a tag line. The entire card is wrapped in an anchor tag that opens in a new tab.
+
+### Props
+
+<ParamField path="src" type="string" required>
+  Path or URL to the project hero image. Rendered inside a 16:9 Bootstrap ratio container.
+</ParamField>
+
+<ParamField path="description" type="string" required>
+  Alt text for the hero image. Used for accessibility.
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  Project name. Displayed as a bold heading below the image.
+</ParamField>
+
+<ParamField path="tag" type="string" required>
+  Short label describing the project type or role (e.g. `Web developer`).
+</ParamField>
+
+<ParamField path="url" type="string" required>
+  External URL the card links to. Opened in a new tab with `rel="noopener noreferrer"`.
+</ParamField>
+
+```astro src/components/Card.astro
+---
+interface Props {
+  src: string;
+  description: string;
+  title: string;
+  tag: string;
+  url: string;
+}
+const { src, description, title, tag, url } = Astro.props;
+---
+<article>
+  <a href={url} class="text-decoration-none" target="_blank" rel="noopener noreferrer">
+    <section class="w-100 ratio ratio-16x9 rounded-2 overflow-hidden position-relative">
+      <img src={src} alt={description} class="img-fluid object-fit-scale rounded-2">
+    </section>
+    <section class="pt-4">
+      <h2 class="fs-5 fw-bold mb-1">{title}</h2>
+      <h2 class="fs-6">{tag}</h2>
+    </section>
+  </a>
+</article>
+```
+
+## Footer.astro
+
+`Footer` renders three social links (LinkedIn, GitHub, Email), a copyright line, and a live clock that updates every second via a TypeScript `setInterval` loop. It has no props.
+
+The live clock reads the current time using `toLocaleTimeString()` and writes it to an element with `id="hora"`.
+
+```astro src/components/Footer.astro
+<footer class="my-5 py-5 animate-on-load animate-delay-4">
+  <ul class="nav gap-4 mb-2">
+    <li class="nav-item"><a href="/projects">Linkedin</a></li>
+    <li class="nav-item"><a href="/about">Github</a></li>
+    <li class="nav-item"><a href="/blog">Email</a></li>
+  </ul>
+  <p class="m-0 mb-2">&copy; Diseñado y desarrollado por Ronald Santana 2025</p>
+</footer>
+<script>
+  function actualizarHora(): void {
+    const ahora = new Date();
+    const hora: string = ahora.toLocaleTimeString();
+    const horaElem = document.getElementById("hora");
+    if (horaElem) { horaElem.textContent = hora; }
+  }
+  actualizarHora();
+  setInterval(actualizarHora, 1000);
+</script>
+```
+
+<Note>
+Astro processes the `<script>` block as TypeScript automatically. The type annotations (`void`, `string`) are valid inside Astro component script tags without any extra configuration.
+</Note>

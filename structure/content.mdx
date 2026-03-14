@@ -1,0 +1,151 @@
+---
+title: 'Content'
+description: 'How the portfolio uses Astro Content Collections to manage project data with type-safe Zod schemas.'
+---
+
+Project data is managed through [Astro Content Collections](https://docs.astro.build/en/guides/content-collections/), which provide a type-safe way to query Markdown files from the `src/content/` directory.
+
+## What are content collections?
+
+Content Collections are Astro's built-in system for organizing and querying local content files (Markdown, MDX, JSON, YAML). Rather than importing Markdown files one by one, you define a collection with a schema and Astro validates every file in that collection against it at build time.
+
+This project uses a single collection named `projects`.
+
+<Columns cols={2}>
+  <Card title="Type safety" icon="shield-check">
+    The Zod schema validates every project file at build time. Missing required fields or wrong types cause a build error rather than a runtime surprise.
+  </Card>
+  <Card title="Simple authoring" icon="file-text">
+    Adding a new project means dropping a Markdown file into `src/content/projects/`. No code changes required.
+  </Card>
+</Columns>
+
+## Collection definition — `src/content/config.ts`
+
+The `config.ts` file registers the `projects` collection and defines its schema using Zod.
+
+```typescript src/content/config.ts
+import { defineCollection, z } from 'astro:content';
+
+const projectsCollection = defineCollection({
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    pubDate: z
+      .string()
+      .or(z.date())
+      .transform((val) => new Date(val)),
+    updatedDate: z
+      .string()
+      .optional()
+      .transform((str) => (str ? new Date(str) : undefined)),
+    heroImage: z.string().optional(),
+    tag: z.string().optional(),
+    url: z.string().optional(),
+  }),
+});
+
+export const collections = { 'projects': projectsCollection };
+```
+
+## Schema fields
+
+<ParamField path="title" type="string" required>
+  The project name. Displayed as the card heading in the project grid.
+</ParamField>
+
+<ParamField path="description" type="string" required>
+  A short description of the project. Used as the `alt` attribute on the card's hero image.
+</ParamField>
+
+<ParamField path="pubDate" type="string | Date" required>
+  Publication date. Accepts either a date string (e.g. `'2023-10-25'`) or a native `Date` object. Transformed to a `Date` instance by the schema.
+</ParamField>
+
+<ParamField path="updatedDate" type="string">
+  Optional last-updated date. When present, transformed to a `Date` instance. When absent, resolves to `undefined`.
+</ParamField>
+
+<ParamField path="heroImage" type="string">
+  Optional path to the project image stored in `public/`. Referenced as a root-relative path (e.g. `'/Edudu.png'`).
+</ParamField>
+
+<ParamField path="tag" type="string">
+  Optional label for the project type or role (e.g. `'Web developer'`). Displayed below the project title on the card.
+</ParamField>
+
+<ParamField path="url" type="string">
+  Optional external URL for the live project. The entire card links to this URL, opening in a new tab.
+</ParamField>
+
+## Project files — `src/content/projects/`
+
+Each project is a single Markdown file in `src/content/projects/`. The filename does not affect the rendered output — only the frontmatter fields matter.
+
+The current project file is `src/content/projects/Edudu.md`:
+
+```markdown src/content/projects/Edudu.md
+---
+title: 'Edudu'
+description: 'Plataforma educativa para niños'
+pubDate: '2023-10-25'
+heroImage: '/Edudu.png'
+tag: 'Web developher'
+url: 'https://edudu-platform.netlify.app/'
+---
+```
+
+The corresponding image file is stored at `public/Edudu.png`. Astro serves everything in `public/` at the root URL, which is why `heroImage` uses the path `'/Edudu.png'`.
+
+<Note>
+The `updatedDate` field is omitted from `Edudu.md`. Because it is marked `optional()` in the schema, this is valid and the field resolves to `undefined` at runtime.
+</Note>
+
+## Querying the collection
+
+The `Projects` component retrieves all entries using `getCollection`:
+
+```astro src/components/Projects.astro (excerpt)
+---
+import { getCollection } from 'astro:content';
+import Card from "./Card.astro";
+const projects = await getCollection('projects');
+---
+```
+
+`getCollection('projects')` returns an array of collection entries. Each entry's validated frontmatter is available on the `.data` property. The `Projects` component passes these values directly to `Card`:
+
+```astro
+<Card
+  src={project.data.heroImage}
+  description={project.data.description}
+  title={project.data.title}
+  tag={project.data.tag}
+  url={project.data.url}
+/>
+```
+
+## Adding a new project
+
+<Steps>
+  <Step title="Add an image">
+    Place the project image in the `public/` directory (e.g. `public/MyProject.png`).
+  </Step>
+  <Step title="Create the Markdown file">
+    Create a new file in `src/content/projects/` (e.g. `src/content/projects/MyProject.md`) with the required frontmatter fields.
+
+    ```markdown
+    ---
+    title: 'My Project'
+    description: 'A short description'
+    pubDate: '2024-01-01'
+    heroImage: '/MyProject.png'
+    tag: 'Web developer'
+    url: 'https://my-project.netlify.app/'
+    ---
+    ```
+  </Step>
+  <Step title="Verify the build">
+    Run `astro build` or `astro dev`. Astro validates the new file against the Zod schema at startup. Any missing required fields or type mismatches will surface as build errors.
+  </Step>
+</Steps>

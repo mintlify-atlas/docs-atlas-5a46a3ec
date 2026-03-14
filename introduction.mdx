@@ -1,0 +1,70 @@
+---
+title: Introduction
+description: An overview of the Rsantana Portfolio — a personal portfolio site built with Astro 5 and Bootstrap 5 for web developer Ronald Santana.
+---
+
+## What is this project?
+
+Rsantana Portfolio is a static personal portfolio website for **Ronald Santana**, a web developer specializing in HTML, CSS, JavaScript, Astro, Bootstrap, and WordPress. The site presents Ronald's work, skills, and contact information in a clean, single-column layout centered at a maximum width of 650 px.
+
+The site is built with [Astro 5](https://astro.build) and styled with [Bootstrap 5.3](https://getbootstrap.com). It has no client-side JavaScript of its own — the only scripts loaded are the Bootstrap bundle and the page's own CSS animations.
+
+## Tech stack
+
+<Columns cols={2}>
+  <Card title="Astro 5" icon="bolt">
+    The core framework. Generates a fully static site with zero-JS by default. Content collections power the projects listing.
+  </Card>
+  <Card title="Bootstrap 5.3" icon="grid">
+    Loaded via CDN. Provides the responsive grid, utility classes, and the Bootstrap Icons icon font.
+  </Card>
+  <Card title="Bootstrap Icons 1.11" icon="shapes">
+    Icon library loaded alongside Bootstrap CSS. Used throughout the UI for social and navigation icons.
+  </Card>
+  <Card title="Onest (Google Fonts)" icon="font">
+    The sole typeface used across the entire site, loaded from Google Fonts at weights 100–900.
+  </Card>
+</Columns>
+
+## Key features
+
+- **Static output** — Astro builds the site to plain HTML and CSS with no client-side framework overhead.
+- **Content collections** — Projects are stored as Markdown files under `src/content/projects/`. Each file carries typed frontmatter: `title`, `description`, `pubDate`, `heroImage`, `tag`, and `url`.
+- **CSS animations** — Elements on each page carry `animate-on-load` and `animate-delay-*` classes that trigger entrance animations on page load.
+- **Responsive single-column layout** — The `<main>` element is constrained to `max-width: 650px` and centered with `mx-auto`, keeping the reading width comfortable on any screen size.
+- **Global design tokens** — Two CSS custom properties (`--primary: #1E1E1E` and `--bg: #f1f1f1`) defined in `Layout.astro` control the site's core colors.
+
+## Pages
+
+The site has two pages:
+
+| Route | File | Description |
+|---|---|---|
+| `/` | `src/pages/index.astro` | Home page. Renders the Nav, Header (bio), Projects grid, and Footer. |
+| `/projects` | _(linked from footer)_ | Projects listing page. |
+
+All pages share the same `Layout.astro` shell, which injects the Bootstrap CSS/JS, Bootstrap Icons, Onest font, and global styles.
+
+## Component overview
+
+The site is composed of four Astro components assembled in `index.astro`:
+
+- **`Nav`** — Top navigation bar.
+- **`Header`** — Bio section introducing Ronald Santana and his skill set.
+- **`Projects`** — Grid of project cards driven by the content collection.
+- **`Footer`** — Social links (LinkedIn, GitHub, Email) and copyright notice.
+
+<Note>
+  The portfolio is written in Spanish (`lang="es"`). Page copy, meta descriptions, and component text are in Spanish by default.
+</Note>
+
+## Next steps
+
+<Columns cols={2}>
+  <Card title="Getting started" icon="rocket" href="/getting-started">
+    Clone the repo and run the project on your machine.
+  </Card>
+  <Card title="Project structure" icon="folder-tree" href="/structure/pages">
+    Explore how pages, components, and content are organized.
+  </Card>
+</Columns>

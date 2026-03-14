@@ -1,0 +1,94 @@
+---
+title: 'Pages'
+description: 'The two route files that define the portfolio site: the home page and the projects listing page.'
+---
+
+The `src/pages/` directory contains two page files and one subdirectory for dynamic routes. Astro uses file-based routing, so each `.astro` file in this directory maps directly to a URL.
+
+<Columns cols={2}>
+  <Card title="index.astro" icon="house" href="#home-page-indexastro">
+    The root URL (`/`). Renders the full portfolio landing page with the hero header and project grid.
+  </Card>
+  <Card title="projects.astro" icon="grid" href="#projects-page-projectsastro">
+    The `/projects` route. Renders the full project listing with a breadcrumb navigation bar.
+  </Card>
+</Columns>
+
+## Home page — `index.astro`
+
+The home page is served at `/`. It composes four components inside the `Layout` wrapper and passes the page title as a prop.
+
+**Components used:**
+- `Layout` — base HTML shell with Bootstrap, fonts, and scroll animations
+- `Nav` — top navigation bar with the site logo
+- `Header` — bio section with Ronald Santana's name and skills summary
+- `Projects` — full project grid fetched from the content collection
+- `Footer` — social links, copyright notice, and a live clock
+
+```astro src/pages/index.astro
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Header from "../components/Header.astro";
+import Projects from "../components/Projects.astro";
+import Footer from "../components/Footer.astro";
+---
+<Layout title="Ronald Santana - Portfolio">
+  <Nav />
+  <Header />
+  <Projects />
+  <Footer />
+</Layout>
+```
+
+## Projects page — `projects.astro`
+
+The projects page is served at `/projects`. It renders the same project grid as the home page, but adds a Bootstrap breadcrumb trail and uses the dark theme variant of `Layout`.
+
+**Components used:**
+- `Layout` — base HTML shell, using the `dark` theme variant
+- `Nav` — top navigation bar
+- `Projects` — full project grid
+- `Footer` — social links and copyright
+
+```astro src/pages/projects.astro
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Projects from "../components/Projects.astro";
+import Footer from "../components/Footer.astro";
+---
+<Layout title="Portfolio - Ronald Santana" theme="dark">
+  <Nav />
+  <nav style="..." aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/" class="text-decoration-none">Inicio</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Proyectos</li>
+    </ol>
+  </nav>
+  <Projects />
+  <Footer />
+</Layout>
+```
+
+## Layout component usage
+
+Both pages wrap their content with `Layout`, which is defined in `src/layouts/Layout.astro`. The `title` prop is required and sets the `<title>` tag in the HTML `<head>`.
+
+```astro
+<Layout title="Page title goes here">
+  <!-- page content -->
+</Layout>
+```
+
+See [Layout.astro](/structure/components) for a full description of what the layout renders.
+
+## Dynamic routes — `src/pages/projects/`
+
+The `src/pages/projects/` subdirectory is reserved for dynamic per-project route files. Astro maps any file at `src/pages/projects/[slug].astro` to the URL `/projects/<slug>`, enabling individual project detail pages driven by the content collection.
+
+<Note>
+No dynamic route files exist yet. The directory is in place to hold future `[slug].astro` or `[...slug].astro` files that would render individual project detail pages.
+</Note>

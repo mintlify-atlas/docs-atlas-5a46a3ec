@@ -1,0 +1,102 @@
+---
+title: Getting started
+description: Clone the Rsantana Portfolio repository, install dependencies, and run the development server locally.
+---
+
+## Prerequisites
+
+Before you begin, make sure you have the following installed:
+
+- **Node.js 18 or later** — Astro 5 requires Node.js 18+. Check your version with `node -v`.
+- **npm** — Comes bundled with Node.js. Check your version with `npm -v`.
+- **Git** — Required to clone the repository.
+
+<Tip>
+  Use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to manage multiple Node.js versions if needed.
+</Tip>
+
+## Run locally
+
+<Steps>
+  <Step title="Clone the repository">
+    Clone the project from GitHub and move into the project directory:
+
+    ```bash
+    git clone https://github.com/Iceheop/rsantana.git
+    cd rsantana
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    Install the project's dependencies with npm:
+
+    <CodeGroup>
+
+    ```bash npm
+    npm install
+    ```
+
+    ```bash pnpm
+    pnpm install
+    ```
+
+    ```bash yarn
+    yarn install
+    ```
+
+    </CodeGroup>
+
+    This installs Astro and all other packages listed in `package.json`.
+  </Step>
+
+  <Step title="Start the development server">
+    Run the dev script to start Astro's local development server:
+
+    ```bash
+    npm run dev
+    ```
+
+    Astro starts on **http://localhost:4321** by default. Open that URL in your browser to see the portfolio.
+
+    <Note>
+      The dev server supports hot module replacement. Changes to `.astro`, `.md`, and `.css` files are reflected immediately without a full page reload.
+    </Note>
+  </Step>
+</Steps>
+
+## What you'll see
+
+When the site loads at `http://localhost:4321`, you'll see the home page with four sections:
+
+1. **Nav** — The top navigation bar.
+2. **Header** — Ronald's bio and skill summary.
+3. **Projects** — A grid of project cards pulled from the `src/content/projects/` Markdown files (for example, the `Edudu` platform).
+4. **Footer** — Social links and copyright line.
+
+All elements animate in on load using the `animate-on-load` CSS class.
+
+## Available scripts
+
+All scripts are defined in `package.json` and run with `npm run <script>`:
+
+| Script | Command | Description |
+|---|---|---|
+| `dev` | `astro dev` | Starts the local dev server at `http://localhost:4321`. |
+| `build` | `astro build` | Compiles the site to static HTML/CSS in the `dist/` directory. |
+| `preview` | `astro preview` | Serves the `dist/` build locally to verify output before deploying. |
+| `astro` | `astro` | Direct access to the Astro CLI for other commands. |
+
+<Warning>
+  Always run `npm run build` and verify with `npm run preview` before deploying, since the dev server may behave slightly differently from the static output.
+</Warning>
+
+## Next steps
+
+<Columns cols={2}>
+  <Card title="Project structure" icon="folder-tree" href="/structure/pages">
+    Learn how pages, components, and content collections are organized.
+  </Card>
+  <Card title="Adding projects" icon="plus" href="/customization/adding-projects">
+    Add your own projects to the portfolio using Markdown files.
+  </Card>
+</Columns>

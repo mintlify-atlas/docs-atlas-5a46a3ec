@@ -1,0 +1,258 @@
+---
+title: Deployment
+description: Build the Rsantana Portfolio site and deploy it to Netlify, Vercel, or GitHub Pages.
+---
+
+<Note>
+  This is a fully static site. The build output is plain HTML, CSS, and JavaScript — no server or Node.js runtime is required at deploy time. Any static hosting platform will work.
+</Note>
+
+## Build the project
+
+Run the build command to compile the site into the `./dist/` directory:
+
+```bash
+npm run build
+```
+
+Astro writes all output files to `./dist/`. This directory is what you upload or point your hosting provider to.
+
+## Preview the build locally
+
+Before deploying, verify the production build looks correct by serving it locally:
+
+```bash
+npm run preview
+```
+
+This serves the contents of `./dist/` on a local HTTP server. It is not the same as `npm run dev` — it reflects exactly what will be served in production.
+
+## Deploy
+
+<Tabs>
+  <Tab title="Netlify">
+    Netlify is the recommended host for this project. There are two ways to deploy.
+
+    ### Option A: Netlify CLI
+
+    <Steps>
+      <Step title="Install the Netlify CLI">
+        ```bash
+        npm install -g netlify-cli
+        ```
+      </Step>
+      <Step title="Log in to your Netlify account">
+        ```bash
+        netlify login
+        ```
+      </Step>
+      <Step title="Build the site">
+        ```bash
+        npm run build
+        ```
+      </Step>
+      <Step title="Deploy to production">
+        ```bash
+        netlify deploy --prod --dir dist
+        ```
+
+        Netlify uploads the contents of `dist/` and returns a live URL.
+      </Step>
+    </Steps>
+
+    ### Option B: Netlify UI
+
+    **Drag and drop:**
+
+    <Steps>
+      <Step title="Build the site">
+        ```bash
+        npm run build
+        ```
+      </Step>
+      <Step title="Open the Netlify dashboard">
+        Go to [netlify.com](https://netlify.com) and open your team's Sites page.
+      </Step>
+      <Step title="Drag the dist folder">
+        Drag the `dist/` folder into the deploy drop zone. Netlify deploys the site immediately.
+      </Step>
+    </Steps>
+
+    **Connect a GitHub repository:**
+
+    <Steps>
+      <Step title="Push your project to GitHub">
+        Make sure your repository is pushed to GitHub.
+      </Step>
+      <Step title="Create a new site from Git">
+        In the Netlify dashboard, select **Add new site → Import an existing project** and choose your repository.
+      </Step>
+      <Step title="Configure the build settings">
+        Set the following values:
+
+        | Setting | Value |
+        | --- | --- |
+        | Build command | `npm run build` |
+        | Publish directory | `dist` |
+
+      </Step>
+      <Step title="Deploy">
+        Click **Deploy site**. Netlify builds and publishes the site. Subsequent pushes to your default branch trigger automatic redeployments.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Vercel">
+    ### Option A: Vercel CLI
+
+    <Steps>
+      <Step title="Install the Vercel CLI">
+        ```bash
+        npm install -g vercel
+        ```
+      </Step>
+      <Step title="Log in to your Vercel account">
+        ```bash
+        vercel login
+        ```
+      </Step>
+      <Step title="Deploy to production">
+        Run this from the project root. Vercel detects Astro automatically and runs the build.
+
+        ```bash
+        vercel --prod
+        ```
+      </Step>
+    </Steps>
+
+    ### Option B: Vercel dashboard
+
+    <Steps>
+      <Step title="Push your project to GitHub">
+        Make sure your repository is pushed to GitHub.
+      </Step>
+      <Step title="Import the repository">
+        Go to [vercel.com](https://vercel.com), select **Add New → Project**, and import your repository.
+      </Step>
+      <Step title="Confirm framework detection">
+        Vercel automatically detects Astro and sets the build command to `npm run build` and the output directory to `dist`. No manual configuration is needed.
+      </Step>
+      <Step title="Deploy">
+        Click **Deploy**. Vercel builds and publishes the site. Subsequent pushes to your default branch trigger automatic redeployments.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="GitHub Pages">
+    GitHub Pages requires two small changes to `astro.config.mjs` and a GitHub Actions workflow file.
+
+    ### Step 1: Update astro.config.mjs
+
+    Add your `site` URL and, if your repository is not at the root domain, a `base` path:
+
+    ```js astro.config.mjs
+    // @ts-check
+    import { defineConfig } from 'astro/config';
+
+    export default defineConfig({
+      site: 'https://<your-github-username>.github.io',
+      base: '<your-repository-name>',
+    });
+    ```
+
+    <Tip>
+      If you are deploying to a custom domain (e.g., `https://rsantana.dev`), set `site` to that domain and omit `base`.
+    </Tip>
+
+    ### Step 2: Add a GitHub Actions workflow
+
+    Create the file `.github/workflows/deploy.yml` in your repository:
+
+    ```yaml .github/workflows/deploy.yml
+    name: Deploy to GitHub Pages
+
+    on:
+      push:
+        branches:
+          - main
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    jobs:
+      build:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+
+          - name: Set up Node.js
+            uses: actions/setup-node@v4
+            with:
+              node-version: 20
+
+          - name: Install dependencies
+            run: npm install
+
+          - name: Build site
+            run: npm run build
+
+          - name: Upload artifact
+            uses: actions/upload-pages-artifact@v3
+            with:
+              path: ./dist
+
+      deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        environment:
+          name: github-pages
+          url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+          - name: Deploy to GitHub Pages
+            id: deployment
+            uses: actions/deploy-pages@v4
+    ```
+
+    ### Step 3: Enable GitHub Pages
+
+    <Steps>
+      <Step title="Open repository settings">
+        Go to your repository on GitHub and navigate to **Settings → Pages**.
+      </Step>
+      <Step title="Set the source to GitHub Actions">
+        Under **Build and deployment**, set **Source** to **GitHub Actions**.
+      </Step>
+      <Step title="Push to main">
+        Push a commit to the `main` branch. The workflow runs, builds the site, and publishes it to GitHub Pages.
+      </Step>
+    </Steps>
+
+    <Warning>
+      If you skip setting `site` and `base` in `astro.config.mjs`, asset paths will be incorrect and the deployed site will not render properly.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Hosting platform comparison
+
+<Columns cols={2}>
+  <Card title="Netlify" icon="cloud">
+    Recommended. Supports drag-and-drop deploys, Git-connected CI/CD, and instant rollbacks. Free tier covers personal portfolio traffic comfortably.
+  </Card>
+  <Card title="Vercel" icon="triangle">
+    Zero-configuration deploys with automatic Astro framework detection. Free tier available with Git-connected CI/CD.
+  </Card>
+  <Card title="GitHub Pages" icon="github">
+    Free hosting directly from your repository. Requires a GitHub Actions workflow and `astro.config.mjs` changes for the `base` path.
+  </Card>
+  <Card title="Any static host" icon="server">
+    Because the build output is plain static files, you can host on any CDN or file server — Cloudflare Pages, AWS S3, Surge.sh, and others all work.
+  </Card>
+</Columns>
+
+## Environment variables
+
+This project does not use environment variables. No `.env` file is required for building or deploying the site.

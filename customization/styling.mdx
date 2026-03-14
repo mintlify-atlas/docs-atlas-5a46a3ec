@@ -1,0 +1,248 @@
+---
+title: 'Styling'
+description: 'Customize colors, typography, layout, animations, and Bootstrap utilities in the Rsantana Portfolio.'
+---
+
+The portfolio's visual layer is defined in `src/layouts/Layout.astro`. All global CSS lives in a single `<style is:global>` block, making it straightforward to change colors, fonts, layout widths, and animations without touching component files.
+
+## CSS custom properties
+
+Two CSS custom properties control the core color palette:
+
+```css
+:root {
+  --primary: #1E1E1E;
+  --bg: #f1f1f1;
+}
+```
+
+<Columns cols={2}>
+  <Card title="--primary" icon="palette">
+    Used for all anchor (`a`) tag colors. Defaults to near-black `#1E1E1E`.
+  </Card>
+  <Card title="--bg" icon="square">
+    Sets the `background-color` of `body`. Defaults to light gray `#f1f1f1`.
+  </Card>
+</Columns>
+
+To change the color scheme, open `src/layouts/Layout.astro` and update the values inside `:root`:
+
+```css
+:root {
+  --primary: #2563EB; /* blue accent */
+  --bg: #ffffff;      /* white background */
+}
+```
+
+<Tip>
+  Because `a` tags inherit `color: var(--primary)`, changing `--primary` updates every link on the site at once — including project card links and nav items.
+</Tip>
+
+### Overriding Bootstrap theme colors
+
+Bootstrap 5 exposes its own CSS variables on `:root` (e.g., `--bs-primary`, `--bs-body-bg`). You can override them in the same `:root` block to align Bootstrap components with your palette:
+
+```css
+:root {
+  --primary: #2563EB;
+  --bg: #ffffff;
+
+  /* Bootstrap overrides */
+  --bs-primary: #2563EB;
+  --bs-body-bg: #ffffff;
+  --bs-link-color: #2563EB;
+}
+```
+
+## Typography
+
+The portfolio loads the **Onest** variable font from Google Fonts and applies it globally to `body`:
+
+```html
+<!-- in Layout.astro <head> -->
+<link
+  href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap"
+  rel="stylesheet"
+/>
+```
+
+```css
+body {
+  font-family: "Onest", sans-serif;
+}
+```
+
+### Swapping the font
+
+<Steps>
+  <Step title="Choose a replacement font">
+    Browse [Google Fonts](https://fonts.google.com) and copy the `<link>` embed code for your chosen family.
+  </Step>
+  <Step title="Replace the Google Fonts link in Layout.astro">
+    Find the existing `<link>` tag that loads Onest and replace it with the new one. For example, to use **Inter**:
+
+    ```html
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    ```
+  </Step>
+  <Step title="Update the font-family declaration">
+    In the `<style is:global>` block, update the `body` rule:
+
+    ```css
+    body {
+      font-family: "Inter", sans-serif;
+    }
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  The `display=swap` parameter in the Google Fonts URL ensures text remains visible while the font loads, avoiding invisible text flashes.
+</Note>
+
+## Layout width
+
+The `main` element has a fixed `max-width` that constrains all page content to a readable column:
+
+```css
+main {
+  max-width: 650px;
+  height: 100%;
+}
+```
+
+This 650 px cap centers the content on wide screens and keeps line lengths comfortable for reading. To widen the layout, increase the value:
+
+```css
+main {
+  max-width: 900px; /* wider layout */
+  height: 100%;
+}
+```
+
+<Note>
+  The project card grid, header, and footer all live inside `main`, so changing `max-width` affects all page sections uniformly.
+</Note>
+
+## Animation system
+
+The portfolio uses two distinct animation patterns: load animations that run once when the page mounts, and scroll animations that trigger as elements enter the viewport.
+
+### Load animations
+
+Elements that animate in immediately on page load use the `animate-on-load` class paired with a delay modifier:
+
+```css
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-on-load {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.animate-delay-1 { animation-delay: 0.1s; }
+.animate-delay-2 { animation-delay: 0.2s; }
+.animate-delay-3 { animation-delay: 0.3s; }
+.animate-delay-4 { animation-delay: 0.4s; }
+```
+
+Each major layout section receives a different delay class, creating a staggered cascade:
+
+| Component | Classes applied | Delay |
+|-----------|----------------|-------|
+| `Nav.astro` | `animate-on-load animate-delay-1` | 0.1 s |
+| `Header.astro` | `animate-on-load animate-delay-2` | 0.2 s |
+| `Projects.astro` | `animate-on-load animate-delay-3` | 0.3 s |
+| `Footer.astro` | `animate-on-load animate-delay-4` | 0.4 s |
+
+To add a fifth staggered element, define a new delay in `Layout.astro` and apply it:
+
+```css
+.animate-delay-5 { animation-delay: 0.5s; }
+```
+
+```html
+<section class="animate-on-load animate-delay-5">...</section>
+```
+
+### Scroll animations
+
+Elements that animate as the user scrolls use a different pair of classes driven by an Intersection Observer:
+
+```css
+/* Initial (hidden) state */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+/* Visible state added by JS when element enters viewport */
+.fade-in-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+```
+
+To make any element scroll-animate, add the `fade-in-up` class to it. The Intersection Observer script in the page will automatically add the `visible` class once the element scrolls into view.
+
+<Tip>
+  Load animations (`animate-on-load`) are best for above-the-fold content that should appear immediately. Use `fade-in-up` for content lower on the page that benefits from being revealed on scroll.
+</Tip>
+
+## Bootstrap 5 utilities
+
+The portfolio relies on Bootstrap 5.3.3 utility classes throughout. No custom grid or component CSS is written — all layout is handled via Bootstrap.
+
+**Bootstrap resources loaded in `Layout.astro`:**
+
+```html
+<!-- CSS -->
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+/>
+<!-- Bootstrap Icons -->
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+  rel="stylesheet"
+/>
+<!-- JS bundle (includes Popper) -->
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  defer
+></script>
+```
+
+Commonly used utility classes in the codebase:
+
+<Columns cols={2}>
+  <Card title="Flexbox" icon="layout">
+    `d-flex`, `align-items-center`, `justify-content-between` — used in `Nav.astro` to align navigation items.
+  </Card>
+  <Card title="Aspect ratio" icon="image">
+    `ratio ratio-16x9` — applied to the project card image wrapper in `Card.astro` to enforce a 16:9 frame.
+  </Card>
+  <Card title="Spacing" icon="move">
+    `py-4`, `py-5`, `mb-1`, `mb-md-5`, `pt-4`, `my-5` — used throughout nav, header, cards, and footer.
+  </Card>
+  <Card title="Typography" icon="type">
+    `fs-5`, `fs-6`, `fw-bold` — size and weight for project card titles and tags.
+  </Card>
+  <Card title="Image" icon="photo">
+    `img-fluid`, `object-fit-scale` — make project images responsive and scale correctly inside their container.
+  </Card>
+  <Card title="Utilities" icon="settings">
+    `w-100`, `rounded-2`, `overflow-hidden`, `position-relative`, `text-decoration-none` — used in `Card.astro` for the image section and link wrapper.
+  </Card>
+</Columns>
+
+<Note>
+  Bootstrap utility classes are not customized. If you want to change spacing, border-radius, or other values globally, use CSS variable overrides in the `:root` block rather than editing Bootstrap source files.
+</Note>
